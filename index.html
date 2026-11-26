@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="RutaLibre — Plataforma web accesible para identificar barreras urbanas, lugares con accesibilidad reportada y rutas adaptadas. Reto 2 ODS 11, Equipo Error 404.">
+  <meta name="theme-color" content="#0F766E">
+  <title>RutaLibre — La ciudad, para todas las personas</title>
+  <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a href="#contenido-principal" class="skip-link">Saltar al contenido principal</a>
+
+  <!-- Región aria-live para avisos cortos y confirmaciones -->
+  <div id="live-status" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- Barra superior de herramientas de accesibilidad (siempre disponible) -->
+  <aside class="a11y-bar" aria-label="Panel de accesibilidad rápida">
+    <div class="container a11y-bar-inner">
+      <div class="a11y-bar-title">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="2"/><path d="M5 9h14M12 9v6l-3 5M12 15l3 5"/></svg>
+        <span>Accesibilidad</span>
+      </div>
+      <div class="a11y-controls" role="group" aria-label="Opciones de accesibilidad">
+        <button type="button" class="btn-a11y" data-a11y-toggle="textoGrande" aria-pressed="false">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19L9 5h2l5 14M6 15h8M17 11v8M13 15h8"/></svg>
+          <span>Texto grande</span>
+        </button>
+        <button type="button" class="btn-a11y" data-a11y-toggle="altoContraste" aria-pressed="false">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3v18a9 9 0 0 0 0-18z" fill="currentColor"/></svg>
+          <span>Alto contraste</span>
+        </button>
+        <button type="button" class="btn-a11y" id="btn-leer-pantalla" aria-pressed="false">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5L6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12"/></svg>
+          <span>Lectura en voz alta</span>
+        </button>
+        <button type="button" class="btn-a11y" data-a11y-toggle="accesoSinVision" aria-pressed="false" title="Activa resumen hablado automático al cambiar de sección">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z"/><path d="M3 3l18 18"/></svg>
+          <span>Acceso sin visión</span>
+        </button>
+        <button type="button" class="btn-a11y" data-a11y-toggle="guiaPorVoz" aria-pressed="false">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l7 19-7-4-7 4 7-19z"/></svg>
+          <span>Guía por voz</span>
+        </button>
+        <button type="button" class="btn-a11y" data-a11y-toggle="reducirAnimaciones" aria-pressed="false">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
+          <span>Reducir animaciones</span>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Encabezado principal -->
+  <header class="site-header">
+    <div class="container header-top">
+      <a href="#inicio" class="brand" aria-label="RutaLibre, ir al inicio">
+        <img src="assets/images/logo.svg" alt="Logotipo de RutaLibre" width="48" height="48">
+        <div>
+          <span class="brand-name">RutaLibre</span>
+          <span class="brand-tagline">La ciudad, para todas las personas.</span>
+        </div>
+      </a>
+
+      <div class="header-controls">
+        <div class="role-box">
+          <label for="selector-rol" class="role-label">Rol activo:</label>
+          <select id="selector-rol" class="role-select">
+            <option value="ciudadano">Ciudadano</option>
+            <option value="cuidador">Cuidador o acompañante</option>
+            <option value="administrador">Administrador (demostración)</option>
+          </select>
+        </div>
+        <button type="button" id="btn-menu-movil" class="btn btn-outline menu-toggle" aria-expanded="false" aria-controls="menu-principal">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+          <span>Menú</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Perfiles rápidos después del selector de rol -->
+    <div class="quick-profiles-wrap">
+      <div class="container">
+        <div class="quick-profiles-header">
+          <span class="quick-profiles-title">Perfiles rápidos de accesibilidad:</span>
+          <span id="quick-profile-status" class="badge badge-info">Personalizado</span>
+        </div>
+        <div class="quick-profiles-grid" role="group" aria-label="Perfiles rápidos para precargar accesibilidad">
+          <button type="button" class="btn-quick-profile" data-quick-profile="sillaRuedas" aria-pressed="false">
+            <svg class="icon icon-lg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="5" r="2"/><path d="M11 8v6h5l2 5M9 14a4.5 4.5 0 1 0 4.2 6"/></svg>
+            <span>Silla de ruedas</span>
+          </button>
+          <button type="button" class="btn-quick-profile" data-quick-profile="bastonAndadera" aria-pressed="false">
+            <svg class="icon icon-lg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="5" r="2"/><path d="M10 8v5l-2 7M10 11l4 2v7M16 9a2 2 0 0 1 2 2v9"/></svg>
+            <span>Bastón o andadera</span>
+          </button>
+          <button type="button" class="btn-quick-profile" data-quick-profile="bajaVision" aria-pressed="false">
+            <svg class="icon icon-lg" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s4-6 10-6 10 6 10 6-4 6-10 6-10-6-10-6z"/><circle cx="12" cy="12" r="2.5"/></svg>
+            <span>Baja visión o ceguera</span>
+          </button>
+          <button type="button" class="btn-quick-profile" data-quick-profile="carriola" aria-pressed="false">
+            <svg class="icon icon-lg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h3l2 8h9l2-5H9"/><circle cx="10" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>
+            <span>Carriola</span>
+          </button>
+          <button type="button" class="btn-quick-profile" data-quick-profile="personaMayor" aria-pressed="false">
+            <svg class="icon icon-lg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="2.2"/><path d="M12 8.5v5.5l-2.5 6M12 14l2.5 6M8.5 11.5h7"/></svg>
+            <span>Persona mayor</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Menú de navegación principal -->
+    <nav id="menu-principal" class="main-nav" aria-label="Navegación principal">
+      <div class="container">
+        <ul class="nav-list">
+          <li><a href="#inicio" class="nav-link" data-route="inicio">Inicio</a></li>
+          <li><a href="#mapa" class="nav-link" data-route="mapa">Mapa</a></li>
+          <li><a href="#reportar" class="nav-link" data-route="reportar">Reportar</a></li>
+          <li><a href="#mis-reportes" class="nav-link" data-route="mis-reportes">Mis reportes</a></li>
+          <li><a href="#avisos" class="nav-link" data-route="avisos">Avisos</a></li>
+          <li><a href="#ayuda" class="nav-link" data-route="ayuda">Ayuda</a></li>
+          <li><a href="#perfil" class="nav-link" data-route="perfil">Perfil</a></li>
+          <li id="nav-item-admin" hidden><a href="#admin" class="nav-link nav-link-admin" data-route="admin">Panel admin</a></li>
+          <li><a href="#plan" class="nav-link" data-route="plan">Plan de trabajo</a></li>
+        </ul>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Aviso visible de toast para confirmaciones o errores -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- Área principal de contenido -->
+  <main id="contenido-principal" class="container main-content" tabindex="-1">
+
+    <!-- 1. INICIO -->
+    <section id="sec-inicio" class="page-section" data-section="inicio" aria-labelledby="titulo-inicio">
+      <div class="hero-card">
+        <div class="hero-content">
+          <div class="hero-badges">
+            <span class="badge badge-teal">ODS 11 — Ciudad para todas y todos</span>
+            <span class="badge badge-demo">Versión de demostración local</span>
+          </div>
+          <h1 id="titulo-inicio" tabindex="-1">RutaLibre: La ciudad, para todas las personas.</h1>
+          <p class="hero-lead">
+            Consulta barreras urbanas, encuentra lugares con accesibilidad reportada, planea rutas según tus necesidades de movilidad y reporta problemas de tu calle con foto, voz o texto.
+          </p>
+          <div class="hero-actions">
+            <a href="#perfil" class="btn btn-primary btn-lg">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              <span>Comenzar</span>
+            </a>
+            <button type="button" class="btn btn-secondary btn-lg" id="btn-inicio-escuchar">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5L6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>
+              <span>Escuchar</span>
+            </button>
+            <a href="#mapa" class="btn btn-outline btn-lg">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18l-6 3V6l6-3 6 3 6-3v15l-6 3-6-3z"/></svg>
+              <span>Explorar mapa</span>
+            </a>
+            <a href="#reportar" class="btn btn-coral btn-lg">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 9v4M12 17h.01M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+              <span>Reportar una barrera</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="hero-role-panel card">
+          <h2>Cambiar rol de demostración</h2>
+          <p class="text-muted">Explora cómo funciona RutaLibre desde tres perspectivas distintas.</p>
+          <div class="role-cards-mini" role="group" aria-label="Selector rápido de rol">
+            <button type="button" class="role-card-btn" data-set-role="ciudadano">
+              <strong>Ciudadano</strong>
+              <span>Consulta rutas, guarda lugares y reporta barreras.</span>
+            </button>
+            <button type="button" class="role-card-btn" data-set-role="cuidador">
+              <strong>Cuidador o acompañante</strong>
+              <span>Configura necesidades de quien acompañas y comparte trayectos.</span>
+            </button>
+            <button type="button" class="role-card-btn" data-set-role="administrador">
+              <strong>Administrador (demostración)</strong>
+              <span>Revisa reportes, edita prioridades y actualiza estados.</span>
+            </button>
+          </div>
+          <div id="resumen-rol-activo" class="role-summary"></div>
+        </div>
+      </div>
+
+      <!-- Resumen rápido de funciones y datos guardados -->
+      <div class="grid-3 mt-lg">
+        <article class="card">
+          <div class="card-icon bg-teal-soft">
+            <svg class="icon icon-lg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg>
+          </div>
+          <h3>Mapa y rutas adaptadas</h3>
+          <p>Calcula trayectos evitando escalones o pendientes fuertes según tu perfil. Si faltan datos de un tramo, te avisamos con claridad.</p>
+          <a href="#mapa" class="link-arrow">Ir al mapa</a>
+        </article>
+        <article class="card">
+          <div class="card-icon bg-coral-soft">
+            <svg class="icon icon-lg" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="12" r="3"/></svg>
+          </div>
+          <h3>Reportes con foto, voz y texto</h3>
+          <p>Genera un folio de seguimiento, recibe una sugerencia de categoría con IA editable y revisa el avance en Mis reportes.</p>
+          <a href="#reportar" class="link-arrow">Crear reporte</a>
+        </article>
+        <article class="card">
+          <div class="card-icon bg-blue-soft">
+            <svg class="icon icon-lg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 4v5c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V7l8-4z"/></svg>
+          </div>
+          <h3>Privacidad en tu navegador</h3>
+          <p>Todo se guarda localmente en tu navegador. Las fotos reducen su tamaño y eliminan datos EXIF/GPS antes de guardarse.</p>
+          <a href="#perfil" class="link-arrow">Configurar perfil y privacidad</a>
+        </article>
+      </div>
+
+      <!-- Lugares y rutas guardadas por el usuario -->
+      <div class="grid-2 mt-lg">
+        <section class="card" aria-labelledby="titulo-favoritos-inicio">
+          <h2 id="titulo-favoritos-inicio">Lugares guardados</h2>
+          <div id="inicio-favoritos-lista"></div>
+        </section>
+        <section class="card" aria-labelledby="titulo-rutas-inicio">
+          <h2 id="titulo-rutas-inicio">Rutas guardadas</h2>
+          <div id="inicio-rutas-lista"></div>
+        </section>
+      </div>
+    </section>
+
+    <!-- 2. MAPA (con Detalle de destino y Ruta propuesta) -->
+    <section id="sec-mapa" class="page-section" data-section="mapa" aria-labelledby="titulo-mapa" hidden>
+      <div class="section-header">
+        <div>
+          <span class="badge badge-demo">Mapa de demostración — Ubicaciones ficticias</span>
+          <h1 id="titulo-mapa" tabindex="-1">Mapa y rutas accesibles</h1>
+        </div>
+        <div class="section-actions">
+          <button type="button" class="btn btn-outline" id="btn-usar-ubicacion-mapa">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+            <span>Mi ubicación</span>
+          </button>
+          <a href="#perfil" class="btn btn-outline">Ajustar perfil de ruta</a>
+        </div>
+      </div>
+
+      <!-- Búsqueda y filtros -->
+      <div class="card map-search-card">
+        <div class="search-row">
+          <div class="field-group grow">
+            <label for="mapa-busqueda">¿A dónde necesitas llegar?</label>
+            <input type="search" id="mapa-busqueda" placeholder="Busca un lugar, rampa o [Calle ejemplo]..." autocomplete="off">
+          </div>
+          <div class="field-group">
+            <label for="mapa-filtro">Filtrar marcadores</label>
+            <select id="mapa-filtro">
+              <option value="todos">Todos los puntos</option>
+              <option value="accesible">Accesibilidad reportada</option>
+              <option value="barrera">Barreras urbanas</option>
+              <option value="favoritos">Lugares guardados</option>
+            </select>
+          </div>
+        </div>
+        <div class="legend" aria-label="Leyenda del mapa">
+          <span class="legend-item">
+            <svg class="icon text-blue" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7" fill="currentColor"/></svg>
+            <span>Ubicación del usuario (ejemplo)</span>
+          </span>
+          <span class="legend-item">
+            <svg class="icon text-green" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l9 4.5v5c0 5.5-3.8 9.5-9 10.5-5.2-1-9-5-9-10.5v-5L12 2z" fill="currentColor"/></svg>
+            <span>Accesibilidad reportada</span>
+          </span>
+          <span class="legend-item">
+            <svg class="icon text-coral" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3L2 20h20L12 3z" fill="currentColor"/></svg>
+            <span>Barrera reportada</span>
+          </span>
+          <span class="legend-item">
+            <span class="line-sample dashed"></span>
+            <span>Tramo sin información suficiente</span>
+          </span>
+        </div>
+      </div>
+
+      <div class="map-layout mt-md">
+        <!-- Contenedor visual del mapa SVG accesible -->
+        <div class="card map-canvas-card">
+          <div class="map-toolbar" role="toolbar" aria-label="Controles de navegación y zoom del mapa">
+            <div class="map-pan-controls" role="group" aria-label="Mover vista del mapa">
+              <button type="button" class="btn-map-ctrl" data-map-pan="up" aria-label="Mover mapa hacia arriba">↑</button>
+              <button type="button" class="btn-map-ctrl" data-map-pan="down" aria-label="Mover mapa hacia abajo">↓</button>
+              <button type="button" class="btn-map-ctrl" data-map-pan="left" aria-label="Mover mapa a la izquierda">←</button>
+              <button type="button" class="btn-map-ctrl" data-map-pan="right" aria-label="Mover mapa a la derecha">→</button>
+            </div>
+            <div class="map-zoom-controls" role="group" aria-label="Zoom del mapa">
+              <button type="button" class="btn-map-ctrl" id="btn-zoom-in" aria-label="Acercar mapa">+</button>
+              <button type="button" class="btn-map-ctrl" id="btn-zoom-out" aria-label="Alejar mapa">−</button>
+              <button type="button" class="btn-map-ctrl btn-map-reset" id="btn-map-reset">Centrar</button>
+            </div>
+          </div>
+
+          <div id="mapa-svg-wrap" class="mapa-svg-wrap" role="region" aria-label="Mapa interactivo de demostración con lugares y barreras en Calle ejemplo">
+            <!-- Renderizado dinámico por js/mapa.js -->
+          </div>
+          <p class="map-helper-note">
+            Consejo de accesibilidad: puedes usar los botones de flecha y zoom, la lista "Cerca de ti" o la tecla Tab para recorrer cada marcador.
+          </p>
+        </div>
+
+        <!-- Panel lateral: Cerca de ti + Detalle de destino + Ruta propuesta -->
+        <aside class="map-sidebar">
+          <div id="mapa-panel-detalle" class="card" aria-live="polite">
+            <!-- Detalle de destino o Ruta propuesta renderizado por js/mapa.js -->
+          </div>
+
+          <div class="card mt-md">
+            <div class="card-header-inline">
+              <h2>Cerca de ti</h2>
+              <span id="contador-cerca" class="badge badge-info">0 puntos</span>
+            </div>
+            <p class="text-sm text-muted">Información de ejemplo en zonas de demostración.</p>
+            <ul id="lista-cerca-de-ti" class="near-list"></ul>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- 3. REPORTAR UNA BARRERA (Formulario -> Revisión IA -> Confirmación) -->
+    <section id="sec-reportar" class="page-section" data-section="reportar" aria-labelledby="titulo-reportar" hidden>
+      <div class="section-header">
+        <div>
+          <span class="badge badge-demo">Demostración local — No se envía a dependencias reales</span>
+          <h1 id="titulo-reportar" tabindex="-1">Reportar una barrera urbana</h1>
+        </div>
+        <div class="stepper" aria-label="Pasos del reporte">
+          <span class="step-pill is-active" data-step-pill="1">1. Datos</span>
+          <span class="step-pill" data-step-pill="2">2. Revisión IA</span>
+          <span class="step-pill" data-step-pill="3">3. Folio</span>
+        </div>
+      </div>
+
+      <!-- PASO 1: Formulario -->
+      <form id="form-reporte" class="card form-card" novalidate>
+        <div class="grid-2">
+          <!-- Fotografía -->
+          <fieldset class="fieldset-box">
+            <legend>1. Fotografía (opcional)</legend>
+            <div class="alert alert-warning-soft">
+              <strong>Cuida la privacidad:</strong> Evita que salgan rostros de personas o placas de autos. La foto se reduce automáticamente y se borran sus datos EXIF y GPS.
+            </div>
+            <div class="photo-actions">
+              <label class="btn btn-outline file-btn">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="12" r="3"/></svg>
+                <span>Subir o tomar foto</span>
+                <input type="file" id="input-foto-reporte" accept="image/*" capture="environment" class="sr-only">
+              </label>
+              <button type="button" class="btn btn-outline" id="btn-quitar-foto" hidden>Eliminar foto</button>
+            </div>
+            <div id="preview-foto-wrap" class="photo-preview" hidden>
+              <img id="preview-foto-img" src="" alt="Vista previa de la fotografía seleccionada para el reporte">
+              <p id="preview-foto-meta" class="text-sm text-muted"></p>
+            </div>
+          </fieldset>
+
+          <!-- Ubicación -->
+          <fieldset class="fieldset-box">
+            <legend>2. Ubicación</legend>
+            <p class="text-sm text-muted">Puedes usar tu ubicación o escribir una calle de referencia (ejemplo: <code>[Calle ejemplo #24]</code>).</p>
+            <div class="btn-row">
+              <button type="button" class="btn btn-outline" id="btn-ubicacion-auto">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+                <span>Usar ubicación automática</span>
+              </button>
+              <button type="button" class="btn btn-outline" id="btn-ubicacion-mapa">Elegir punto de ejemplo</button>
+            </div>
+            <div class="field-group mt-sm">
+              <label for="reporte-ubicacion-texto">Dirección o referencia</label>
+              <input type="text" id="reporte-ubicacion-texto" required placeholder="[Calle ejemplo #24, esquina Av. ejemplo]">
+            </div>
+            <p id="reporte-ubicacion-estado" class="text-sm text-muted"></p>
+          </fieldset>
+        </div>
+
+        <div class="grid-2 mt-md">
+          <!-- Voz -->
+          <fieldset class="fieldset-box">
+            <legend>3. Nota de voz (opcional)</legend>
+            <p id="voz-compatibilidad-aviso" class="text-sm text-muted"></p>
+            <div class="btn-row">
+              <button type="button" class="btn btn-outline" id="btn-grabar-voz">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4M8 22h8"/></svg>
+                <span>Grabar</span>
+              </button>
+              <button type="button" class="btn btn-outline" id="btn-detener-voz" disabled>Detener</button>
+              <button type="button" class="btn btn-outline" id="btn-reproducir-voz" disabled>Reproducir</button>
+              <button type="button" class="btn btn-outline" id="btn-transcribir-voz">Dictar texto</button>
+            </div>
+            <audio id="audio-preview" controls hidden class="mt-sm full-width"></audio>
+            <p id="voz-estado" class="text-sm text-muted mt-sm"></p>
+          </fieldset>
+
+          <!-- Categoría y texto -->
+          <fieldset class="fieldset-box">
+            <legend>4. Descripción y categoría</legend>
+            <div class="field-group">
+              <label for="reporte-categoria">Categoría sugerida por ti</label>
+              <select id="reporte-categoria" required>
+                <option value="Banqueta dañada">Banqueta dañada</option>
+                <option value="Rampa bloqueada">Rampa bloqueada</option>
+                <option value="Falta de rampa">Falta de rampa</option>
+                <option value="Escaleras sin alternativa">Escaleras sin alternativa</option>
+                <option value="Elevador fuera de servicio">Elevador fuera de servicio</option>
+                <option value="Obstrucción">Obstrucción</option>
+                <option value="Cruce peligroso">Cruce peligroso</option>
+                <option value="Transporte inaccesible">Transporte inaccesible</option>
+                <option value="Señalización insuficiente">Señalización insuficiente</option>
+                <option value="Otro">Otro</option>
+              </select>
+            </div>
+            <div class="field-group mt-sm">
+              <label for="reporte-descripcion">Describe lo que está pasando</label>
+              <textarea id="reporte-descripcion" rows="4" required placeholder="Ejemplo: La rampa de la esquina está obstruida por escombro y no permite pasar con silla de ruedas."></textarea>
+            </div>
+          </fieldset>
+        </div>
+
+        <div id="reporte-form-error" class="alert alert-danger mt-md" hidden></div>
+
+        <div class="form-footer mt-md">
+          <button type="submit" class="btn btn-primary btn-lg" id="btn-analizar-reporte">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.2 5.8L20 11l-5.8 2.2L12 19l-2.2-5.8L4 11l5.8-2.2L12 3z"/></svg>
+            <span>Analizar reporte</span>
+          </button>
+        </div>
+      </form>
+
+      <!-- PASO 2: Revisión del análisis de IA (todo editable) -->
+      <div id="vista-revision-ia" class="card form-card" hidden>
+        <div class="ai-banner">
+          <span class="badge badge-teal" id="ia-modo-badge">Análisis asistido por IA</span>
+          <p><strong>El análisis de IA es una sugerencia. Puedes corregirlo antes de enviar tu reporte.</strong></p>
+        </div>
+
+        <div id="ia-resumen-meta" class="grid-2 mt-md">
+          <div>
+            <p><strong>Personas que podrían verse afectadas:</strong> <span id="ia-personas-afectadas">—</span></p>
+            <p><strong>Nivel de confianza estimado:</strong> <span id="ia-confianza">—</span></p>
+          </div>
+          <div id="ia-foto-mini-wrap" hidden>
+            <img id="ia-foto-mini" src="" alt="Miniatura de evidencia adjunta" class="mini-thumb">
+          </div>
+        </div>
+
+        <form id="form-confirmar-ia" class="mt-md">
+          <div class="grid-2">
+            <div class="field-group">
+              <label for="ia-edit-categoria">Categoría</label>
+              <select id="ia-edit-categoria"></select>
+            </div>
+            <div class="field-group">
+              <label for="ia-edit-prioridad">Prioridad</label>
+              <select id="ia-edit-prioridad">
+                <option value="Alta">Alta</option>
+                <option value="Media">Media</option>
+                <option value="Baja">Baja</option>
+              </select>
+            </div>
+          </div>
+          <div class="grid-2 mt-sm">
+            <div class="field-group">
+              <label for="ia-edit-dependencia">Canal o dependencia sugerida (ejemplo)</label>
+              <input type="text" id="ia-edit-dependencia">
+            </div>
+            <div class="field-group">
+              <label for="ia-edit-ubicacion">Ubicación final</label>
+              <input type="text" id="ia-edit-ubicacion">
+            </div>
+          </div>
+          <div class="field-group mt-sm">
+            <label for="ia-edit-descripcion">Resumen del reporte</label>
+            <textarea id="ia-edit-descripcion" rows="3"></textarea>
+          </div>
+
+          <div class="btn-row mt-md">
+            <button type="button" class="btn btn-outline" id="btn-ia-corregir">Corregir / editar datos iniciales</button>
+            <button type="button" class="btn btn-outline" id="btn-ia-regresar">Regresar</button>
+            <button type="submit" class="btn btn-primary btn-lg" id="btn-enviar-reporte">Enviar reporte</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- PASO 3: Confirmación -->
+      <div id="vista-confirmacion-reporte" class="card form-card" hidden>
+        <!-- Renderizado dinámico por js/reportes.js -->
+      </div>
+    </section>
+
+    <!-- 4. MIS REPORTES -->
+    <section id="sec-mis-reportes" class="page-section" data-section="mis-reportes" aria-labelledby="titulo-mis-reportes" hidden>
+      <div class="section-header">
+        <div>
+          <span class="badge badge-demo">Guardado en este navegador</span>
+          <h1 id="titulo-mis-reportes" tabindex="-1">Mis reportes y seguimiento</h1>
+        </div>
+        <div class="section-actions">
+          <button type="button" class="btn btn-outline" id="btn-exportar-json">Exportar reportes (JSON)</button>
+          <label class="btn btn-outline file-btn">
+            <span>Importar reportes</span>
+            <input type="file" id="input-importar-json" accept="application/json" class="sr-only">
+          </label>
+        </div>
+      </div>
+
+      <div class="filter-pills" role="group" aria-label="Filtrar reportes por estado">
+        <button type="button" class="pill is-active" data-filtro-reporte="todos">Todos</button>
+        <button type="button" class="pill" data-filtro-reporte="Recibido">Recibidos</button>
+        <button type="button" class="pill" data-filtro-reporte="Canalizado">Canalizados</button>
+        <button type="button" class="pill" data-filtro-reporte="En atención">En atención</button>
+        <button type="button" class="pill" data-filtro-reporte="Requiere más información">Requiere más información</button>
+        <button type="button" class="pill" data-filtro-reporte="Resuelto">Resueltos</button>
+      </div>
+
+      <div class="reports-layout mt-md">
+        <div id="lista-mis-reportes" class="reports-grid"></div>
+        <aside id="detalle-mi-reporte" class="card" hidden aria-live="polite"></aside>
+      </div>
+    </section>
+
+    <!-- 5. AVISOS -->
+    <section id="sec-avisos" class="page-section" data-section="avisos" aria-labelledby="titulo-avisos" hidden>
+      <div class="section-header">
+        <div>
+          <span class="badge badge-demo">Avisos ficticios — Fuente de demostración</span>
+          <h1 id="titulo-avisos" tabindex="-1">Avisos de movilidad urbana</h1>
+        </div>
+      </div>
+      <p class="text-muted">Todos los avisos mostrados son ejemplos ficticios para demostración. Puedes escucharlos o pedir una explicación con palabras sencillas.</p>
+      <div id="lista-avisos" class="grid-2 mt-md"></div>
+    </section>
+
+    <!-- 6. AYUDA -->
+    <section id="sec-ayuda" class="page-section" data-section="ayuda" aria-labelledby="titulo-ayuda" hidden>
+      <div class="section-header">
+        <div>
+          <h1 id="titulo-ayuda" tabindex="-1">Centro de ayuda y emergencia</h1>
+          <p class="text-muted">Guías sencillas para usar RutaLibre y resolver dudas paso a paso.</p>
+        </div>
+        <button type="button" class="btn btn-danger btn-lg" id="btn-emergencia-911">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 9v4M12 17h.01M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+          <span>Emergencia (911 informativo)</span>
+        </button>
+      </div>
+
+      <div class="grid-2 mt-md">
+        <section class="card" aria-labelledby="titulo-asistente-ayuda">
+          <h2 id="titulo-asistente-ayuda">Pregúntame con tu voz o por escrito</h2>
+          <p class="text-sm text-muted">Asistente de demostración (o Gemini si configuraste una clave temporal). Solo responde sobre el uso de RutaLibre.</p>
+          <div class="field-group mt-sm">
+            <label for="ayuda-pregunta-input">Escribe tu pregunta</label>
+            <input type="text" id="ayuda-pregunta-input" placeholder="Ejemplo: ¿Cómo reporto una rampa bloqueada?">
+          </div>
+          <div class="btn-row mt-sm">
+            <button type="button" class="btn btn-primary" id="btn-ayuda-preguntar">Consultar ayuda</button>
+            <button type="button" class="btn btn-outline" id="btn-ayuda-voz">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4"/></svg>
+              <span>Preguntar con mi voz</span>
+            </button>
+          </div>
+          <div id="ayuda-respuesta-box" class="ai-answer-box mt-md" hidden aria-live="polite"></div>
+        </section>
+
+        <section class="card" aria-labelledby="titulo-guia-pasos">
+          <h2 id="titulo-guia-pasos">Guía paso a paso</h2>
+          <div class="accordion-list">
+            <details open>
+              <summary>Cómo buscar rutas según tus necesidades</summary>
+              <p>1. Elige un perfil rápido arriba o entra a <strong>Perfil</strong>.<br>2. Ve a <strong>Mapa</strong> y selecciona un destino en <em>Cerca de ti</em> o en el mapa.<br>3. Presiona <strong>Cómo llegar</strong>. Si falta información en un tramo, verás una alerta clara.</p>
+            </details>
+            <details>
+              <summary>Cómo reportar una barrera urbana</summary>
+              <p>1. Entra a <strong>Reportar</strong>.<br>2. Agrega foto (sin rostros ni placas), ubicación y descripción o nota de voz.<br>3. Presiona <strong>Analizar reporte</strong>, corrige la sugerencia si hace falta y confirma el envío para obtener tu folio.</p>
+            </details>
+            <details>
+              <summary>Cómo consultar tus reportes</summary>
+              <p>Entra a <strong>Mis reportes</strong>. Ahí puedes filtrar por estado, ver la barra de avance y confirmar si la barrera continúa o ya fue resuelta.</p>
+            </details>
+            <details>
+              <summary>Cómo configurar accesibilidad</summary>
+              <p>Usa la barra superior de <strong>Accesibilidad</strong> en cualquier momento o abre la sección <strong>Perfil</strong> para seleccionar tus 12 opciones de movilidad y 9 preferencias de ruta.</p>
+            </details>
+          </div>
+        </section>
+      </div>
+
+      <section class="card mt-md" aria-labelledby="titulo-faq">
+        <h2 id="titulo-faq">Preguntas frecuentes y contacto</h2>
+        <div class="grid-2 mt-sm">
+          <div>
+            <p><strong>¿Mis reportes llegan a una oficina de gobierno real?</strong><br>No. RutaLibre es un prototipo de demostración para el hackatón. Las dependencias mostradas tienen la marca <code>(ejemplo)</code>.</p>
+            <p class="mt-sm"><strong>¿Dónde se guardan mis fotos y datos?</strong><br>Únicamente en este navegador (LocalStorage e IndexedDB). Puedes borrarlos cuando quieras desde tu Perfil.</p>
+          </div>
+          <div>
+            <p><strong>¿Por qué el dictado por voz no funciona en algunos navegadores?</strong><br>El reconocimiento de voz funciona mejor en Chrome y Edge. En Firefox y otros navegadores siempre puedes escribir directamente.</p>
+            <p class="mt-sm"><strong>Contacto del equipo (demostración):</strong> Equipo Error 404 — Reto 2 "Ciudad para todas y todos" (ODS 11).</p>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <!-- 7. PERFIL DE ACCESIBILIDAD Y PRIVACIDAD -->
+    <section id="sec-perfil" class="page-section" data-section="perfil" aria-labelledby="titulo-perfil" hidden>
+      <div class="section-header">
+        <div>
+          <h1 id="titulo-perfil" tabindex="-1">¿Qué necesitas para moverte por la ciudad?</h1>
+          <p id="perfil-subtitulo-rol" class="text-muted">Configura tu perfil o el de la persona a quien acompañas. Todo se guarda en este navegador.</p>
+        </div>
+        <button type="button" class="btn btn-outline" id="btn-restablecer-demo">Restablecer datos de demostración</button>
+      </div>
+
+      <form id="form-perfil" class="card">
+        <h2>Opciones de movilidad y necesidades (12 opciones)</h2>
+        <div id="grid-necesidades" class="checkbox-grid mt-sm"></div>
+
+        <div class="field-group mt-md">
+          <label for="perfil-otro-texto">Otra necesidad o comentario (opcional)</label>
+          <input type="text" id="perfil-otro-texto" placeholder="Ejemplo: Necesito sombra o cruces tranquilos">
+        </div>
+
+        <h2 class="mt-lg">Configuración de ruta y asistencia (9 opciones)</h2>
+        <div id="grid-config-ruta" class="checkbox-grid mt-sm"></div>
+
+        <div class="grid-2 mt-md">
+          <div class="field-group">
+            <label for="perfil-distancia-max">Distancia máxima cómoda a pie (metros)</label>
+            <select id="perfil-distancia-max">
+              <option value="400">Hasta 400 m (recorrido corto)</option>
+              <option value="800">Hasta 800 m (recorrido medio)</option>
+              <option value="1500">Hasta 1,500 m (recorrido largo)</option>
+              <option value="0">Sin límite establecido</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label for="perfil-preferencia-ruta">Prioridad al calcular ruta</label>
+            <select id="perfil-preferencia-ruta">
+              <option value="accesible">Máxima accesibilidad (evitar barreras)</option>
+              <option value="equilibrada">Equilibrada (accesibilidad y distancia)</option>
+              <option value="corta">Distancia más corta posible</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-footer mt-md">
+          <button type="submit" class="btn btn-primary btn-lg">Guardar perfil de accesibilidad</button>
+        </div>
+      </form>
+
+      <!-- Configuración opcional de Gemini en sesión -->
+      <section class="card mt-md" aria-labelledby="titulo-gemini-config">
+        <h2 id="titulo-gemini-config">Configuración de Inteligencia Artificial (Gemini opcional)</h2>
+        <p class="text-sm text-muted">
+          Por defecto RutaLibre usa el <strong>Modo Demostración</strong> sin enviar datos fuera. Si eres evaluador y deseas probar respuestas reales con Gemini en esta sesión, puedes ingresar una clave temporal aquí (nunca se guarda en el código fuente ni en LocalStorage).
+        </p>
+        <div class="search-row mt-sm">
+          <div class="field-group grow">
+            <label for="input-gemini-key">Clave temporal de API Gemini (solo sesión actual)</label>
+            <input type="password" id="input-gemini-key" placeholder="AIza... (opcional)" autocomplete="off">
+          </div>
+          <button type="button" class="btn btn-outline" id="btn-guardar-gemini-key">Usar en esta sesión</button>
+          <button type="button" class="btn btn-outline" id="btn-limpiar-gemini-key">Volver a modo demo</button>
+        </div>
+        <p id="gemini-key-estado" class="text-sm mt-sm"></p>
+      </section>
+
+      <!-- Aviso de privacidad en lectura fácil y borrado total -->
+      <section class="card mt-md privacy-card" aria-labelledby="titulo-privacidad">
+        <h2 id="titulo-privacidad">Privacidad y control de tus datos (lectura fácil)</h2>
+        <ul class="simple-list mt-sm">
+          <li><strong>Qué guardamos:</strong> tu perfil, reportes, folios, favoritos y rutas en LocalStorage; fotos y notas de voz en IndexedDB.</li>
+          <li><strong>Dónde queda todo:</strong> solo en este navegador. Nadie más puede verlo desde otro dispositivo.</li>
+          <li><strong>Fotos seguras:</strong> antes de guardarlas las hacemos más pequeñas y borramos su información EXIF y GPS.</li>
+          <li><strong>Cuándo salen datos:</strong> solo si activas la clave de Gemini (para analizar reporte, simplificar aviso o ayuda) o si usas el dictado por voz en Chrome.</li>
+        </ul>
+        <div class="btn-row mt-md">
+          <button type="button" class="btn btn-danger" id="btn-borrar-todos-datos">Borrar todos mis datos</button>
+        </div>
+      </section>
+    </section>
+
+    <!-- 8. PANEL ADMINISTRADOR (solo visible con el rol Administrador) -->
+    <section id="sec-admin" class="page-section" data-section="admin" aria-labelledby="titulo-admin" hidden>
+      <div class="section-header">
+        <div>
+          <span class="badge badge-demo">Panel de demostración — Cambios visibles solo en este navegador</span>
+          <h1 id="titulo-admin" tabindex="-1">Panel Administrador</h1>
+        </div>
+      </div>
+
+      <div id="admin-bloqueo-rol" class="card" hidden>
+        <h2>Acceso exclusivo del rol Administrador (demostración)</h2>
+        <p>Para ver y gestionar los reportes como administrador, cambia tu rol activo en el selector superior o presiona el botón de abajo.</p>
+        <button type="button" class="btn btn-primary mt-sm" id="btn-activar-rol-admin">Cambiar a rol Administrador (demostración)</button>
+      </div>
+
+      <div id="admin-contenido" hidden>
+        <div id="admin-metricas" class="metrics-grid"></div>
+
+        <div class="card mt-md">
+          <div class="search-row">
+            <div class="field-group">
+              <label for="admin-filtro-estado">Filtrar por estado</label>
+              <select id="admin-filtro-estado">
+                <option value="todos">Todos</option>
+                <option value="Recibido">Recibido</option>
+                <option value="Canalizado">Canalizado</option>
+                <option value="En atención">En atención</option>
+                <option value="Requiere más información">Requiere más información</option>
+                <option value="Resuelto">Resuelto</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label for="admin-filtro-prioridad">Filtrar por prioridad</label>
+              <select id="admin-filtro-prioridad">
+                <option value="todos">Todas</option>
+                <option value="Alta">Alta</option>
+                <option value="Media">Media</option>
+                <option value="Baja">Baja</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="reports-layout mt-md">
+          <div id="admin-lista-reportes" class="reports-grid"></div>
+          <aside id="admin-detalle-panel" class="card" aria-live="polite">
+            <p class="text-muted">Selecciona un reporte de la lista para revisar la fotografía, el análisis de IA y actualizar su estado.</p>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <!-- 9. PLAN DE TRABAJO VISUAL EDITABLE -->
+    <section id="sec-plan" class="page-section" data-section="plan" aria-labelledby="titulo-plan" hidden>
+      <div class="section-header">
+        <div>
+          <span class="badge badge-info">Editable en navegador — Sincronizable vía exportación Markdown</span>
+          <h1 id="titulo-plan" tabindex="-1">Plan de trabajo del proyecto</h1>
+        </div>
+        <div class="section-actions">
+          <button type="button" class="btn btn-primary" id="btn-exportar-plan-md">Exportar como Markdown</button>
+          <button type="button" class="btn btn-outline" id="btn-agregar-fila-plan">Agregar actividad</button>
+        </div>
+      </div>
+      <p class="text-sm text-muted">
+        Los cambios que hagas en esta tabla se guardan en tu navegador sin alterar el archivo <code>PLAN_DE_TRABAJO.md</code>. Usa <strong>Exportar como Markdown</strong> para copiar o descargar la versión actualizada.
+      </p>
+
+      <div class="card mt-md table-responsive">
+        <table class="workplan-table" id="tabla-plan-trabajo">
+          <thead>
+            <tr>
+              <th>Etapa</th>
+              <th>Actividad</th>
+              <th>Descripción</th>
+              <th>Responsable</th>
+              <th>Prioridad</th>
+              <th>Horas est.</th>
+              <th>Fecha límite</th>
+              <th>Depende de</th>
+              <th>Criterio de terminado</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-plan-trabajo"></tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Diálogo modal reutilizable accesible -->
+  <dialog id="app-dialog" class="app-dialog" aria-labelledby="dialog-titulo">
+    <div class="dialog-header">
+      <h2 id="dialog-titulo">Información</h2>
+      <button type="button" class="btn btn-outline btn-sm" id="dialog-cerrar" aria-label="Cerrar ventana">Cerrar</button>
+    </div>
+    <div id="dialog-cuerpo" class="dialog-body"></div>
+    <div id="dialog-acciones" class="dialog-actions"></div>
+  </dialog>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>
+        <strong>RutaLibre</strong> — Equipo <strong>Error 404</strong> · Reto 2 "Ciudad para todas y todos" (ODS 11)
+        <p class="text-sm text-muted">Prototipo de demostración. Los datos de calles, avisos y dependencias son ficticios.</p>
+      </div>
+      <div class="footer-links">
+        <a href="#plan">Plan de trabajo</a>
+        <a href="#perfil">Privacidad y datos</a>
+        <a href="#ayuda">Ayuda y 911</a>
+      </div>
+    </div>
+  </footer>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

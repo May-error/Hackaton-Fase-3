@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Logo RutaLibre">
+  <rect width="64" height="64" rx="16" fill="#0F766E"/>
+  <path d="M18 46V24c0-5.5 4.5-10 10-10h8c5.5 0 10 4.5 10 10 0 4.8-3.4 8.8-8 9.8L46 46h-8.5l-7.2-11.5H25V46h-7zm7-18h10c2.2 0 4-1.8 4-4s-1.8-4-4-4H25v8z" fill="#FFFFFF"/>
+  <circle cx="48" cy="48" r="8" fill="#FACC15" stroke="#0B1220" stroke-width="2.5"/>
+  <path d="M45 48h6M48 45v6" stroke="#0B1220" stroke-width="2" stroke-linecap="round"/>
+</svg>
