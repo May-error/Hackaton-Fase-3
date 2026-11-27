@@ -125,3 +125,109 @@ export async function compartirTrayecto(titulo, texto) {
     return { metodo: 'manual', ok: false, texto: `${titulo} — ${texto}` };
   }
 }
+
+/**
+ * Controlador de guía de voz paso a paso con comandos de voz ("parar", "seguir", "siguiente").
+ */
+export function crearGuiaPasoAPaso(pasos, { onPaso, onEstado } = {}) {
+  let indice = 0;
+  let pausado = false;
+  let activo = false;
+  let recComandos = null;
+
+  function leerActual() {
+    if (!activo || pausado) return;
+    if (indice >= pasos.length) {
+      activo = false;
+      onEstado?.('Recorrido de voz finalizado.');
+      detenerEscuchaComandos();
+      return;
+    }
+    onPaso?.(indice, pasos[indice]);
+    onEstado?.(`Leyendo paso ${indice + 1} de ${pasos.length}. Di "parar" o "seguir".`);
+    hablarTexto(`Paso ${indice + 1} de ${pasos.length}. ${pasos[indice]}`, () => {
+      if (activo && !pausado) {
+        indice += 1;
+        leerActual();
+      }
+    });
+  }
+
+  function iniciarEscuchaComandos() {
+    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRec || recComandos) return;
+    recComandos = new SpeechRec();
+    recComandos.lang = 'es-MX';
+    recComandos.continuous = true;
+    recComandos.interimResults = false;
+    recComandos.onresult = (event) => {
+      const last = event.results[event.results.length - 1];
+      const cmd = (last?.[0]?.transcript || '').toLowerCase().trim();
+      if (/parar|pausar|alto|detener/.test(cmd)) {
+        pausar();
+      } else if (/seguir|continuar|reanudar|avanzar/.test(cmd)) {
+        seguir();
+      } else if (/siguiente|próximo|proximo/.test(cmd)) {
+        siguiente();
+      }
+    };
+    recComandos.onend = () => {
+      if (activo && recComandos) {
+        try { recComandos.start(); } catch { /* ignorar */ }
+      }
+    };
+    try { recComandos.start(); } catch { /* ignorar */ }
+  }
+
+  function detenerEscuchaComandos() {
+    if (recComandos) {
+      const r = recComandos;
+      recComandos = null;
+      try { r.stop(); } catch { /* ignorar */ }
+    }
+  }
+
+  function iniciar() {
+    indice = 0;
+    pausado = false;
+    activo = true;
+    iniciarEscuchaComandos();
+    leerActual();
+  }
+
+  function pausar() {
+    if (!activo) return;
+    pausado = true;
+    detenerLectura();
+    onEstado?.('Guía de voz en pausa. Di "seguir" para continuar.');
+  }
+
+  function seguir() {
+    if (!activo) {
+      iniciar();
+      return;
+    }
+    if (pausado) {
+      pausado = false;
+      leerActual();
+    }
+  }
+
+  function siguiente() {
+    if (!activo) return;
+    pausado = false;
+    detenerLectura();
+    indice = Math.min(pasos.length - 1, indice + 1);
+    leerActual();
+  }
+
+  function detener() {
+    activo = false;
+    pausado = false;
+    detenerLectura();
+    detenerEscuchaComandos();
+    onEstado?.('Guía de voz detenida.');
+  }
+
+  return { iniciar, pausar, seguir, siguiente, detener };
+}

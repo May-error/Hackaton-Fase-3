@@ -131,6 +131,25 @@
   <!-- Aviso visible de toast para confirmaciones o errores -->
   <div id="toast-container" class="toast-container" aria-live="polite"></div>
 
+  <!-- Panel visible para Acceso sin visión y Comandos de voz -->
+  <section id="panel-sin-vision" class="container mt-sm" hidden aria-label="Control por voz para acceso sin visión">
+    <div class="card ai-banner">
+      <div class="card-header-inline">
+        <div>
+          <strong>Modo Acceso sin visión activo</strong>
+          <p class="text-sm">Di comandos como: <em>"ir a mapa"</em>, <em>"ir a reportar"</em>, <em>"ir a inicio"</em>, <em>"leer"</em> o <em>"parar"</em>.</p>
+        </div>
+        <div class="btn-row">
+          <button type="button" class="btn btn-primary" id="btn-comando-voz-global" accesskey="v">
+            <span>Hablar comando (Alt + V)</span>
+          </button>
+          <button type="button" class="btn btn-outline" id="btn-leer-seccion-actual">Leer sección</button>
+        </div>
+      </div>
+      <p id="comando-voz-estado" class="text-sm mt-sm" aria-live="polite"></p>
+    </div>
+  </section>
+
   <!-- Área principal de contenido -->
   <main id="contenido-principal" class="container main-content" tabindex="-1">
 

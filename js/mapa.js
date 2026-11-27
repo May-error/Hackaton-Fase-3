@@ -6,7 +6,7 @@
 import { LUGARES_DEMO, NODOS_MAPA, TRAMOS_MAPA } from './datos-demo.js';
 import { getEstado, actualizarEstado } from './estado.js';
 import { calcularRutaDijkstra } from './rutas.js';
-import { hablarTexto, compartirTrayecto } from './voz.js';
+import { hablarTexto, compartirTrayecto, crearGuiaPasoAPaso } from './voz.js';
 
 /**
  * Adaptador preparado para futura conexión con Leaflet/OpenStreetMap.
@@ -330,17 +330,49 @@ function renderPanelLateral() {
       </ol>
       <div class="btn-row mt-md">
         <button type="button" class="btn btn-primary" id="btn-guia-voz-ruta">Iniciar guía de voz</button>
+        <button type="button" class="btn btn-outline" id="btn-guia-pausar" hidden>Pausar</button>
+        <button type="button" class="btn btn-outline" id="btn-guia-seguir" hidden>Seguir</button>
+        <button type="button" class="btn btn-outline" id="btn-guia-siguiente" hidden>Siguiente</button>
+        <button type="button" class="btn btn-outline" id="btn-guia-detener" hidden>Detener</button>
         <button type="button" class="btn btn-outline" id="btn-guardar-ruta">Guardar ruta</button>
         <button type="button" class="btn btn-outline" id="btn-compartir-ruta">Compartir trayecto</button>
         <button type="button" class="btn btn-outline" id="btn-volver-mapa">Volver al mapa</button>
       </div>
+      <p id="guia-voz-estado" class="text-sm mt-sm" aria-live="polite"></p>
     `;
 
+    let guiaCtrl = null;
+    const btnPausar = panel.querySelector('#btn-guia-pausar');
+    const btnSeguir = panel.querySelector('#btn-guia-seguir');
+    const btnSiguiente = panel.querySelector('#btn-guia-siguiente');
+    const btnDetener = panel.querySelector('#btn-guia-detener');
+    const estadoGuiaEl = panel.querySelector('#guia-voz-estado');
+
     panel.querySelector('#btn-guia-voz-ruta')?.addEventListener('click', () => {
-      const texto = `Ruta hacia ${lugar.nombre}. Distancia ${r.totalDistanceM} metros, tiempo estimado ${r.estimatedMinutes} minutos. ${r.alerts.join(' ')} ${r.instructions.join(' ')}`;
-      if (!hablarTexto(texto)) {
-        callbacks.onToast?.('Tu navegador no admite lectura por voz.');
-      }
+      const pasos = [
+        `Ruta hacia ${lugar.nombre}. Distancia ${r.totalDistanceM} metros, tiempo estimado ${r.estimatedMinutes} minutos.`,
+        ...r.alerts,
+        ...r.instructions
+      ];
+      guiaCtrl = crearGuiaPasoAPaso(pasos, {
+        onEstado: (msg) => { if (estadoGuiaEl) estadoGuiaEl.textContent = msg; }
+      });
+      btnPausar.hidden = false;
+      btnSeguir.hidden = false;
+      btnSiguiente.hidden = false;
+      btnDetener.hidden = false;
+      guiaCtrl.iniciar();
+    });
+
+    btnPausar?.addEventListener('click', () => guiaCtrl?.pausar());
+    btnSeguir?.addEventListener('click', () => guiaCtrl?.seguir());
+    btnSiguiente?.addEventListener('click', () => guiaCtrl?.siguiente());
+    btnDetener?.addEventListener('click', () => {
+      guiaCtrl?.detener();
+      btnPausar.hidden = true;
+      btnSeguir.hidden = true;
+      btnSiguiente.hidden = true;
+      btnDetener.hidden = true;
     });
 
     panel.querySelector('#btn-guardar-ruta')?.addEventListener('click', () => {

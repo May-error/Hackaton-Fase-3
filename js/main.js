@@ -132,6 +132,9 @@ function aplicarClasesA11y() {
 
   const btnLectura = document.getElementById('btn-leer-pantalla');
   btnLectura?.setAttribute('aria-pressed', String(Boolean(a11y.lecturaVozAlta)));
+
+  const panelSinVision = document.getElementById('panel-sin-vision');
+  if (panelSinVision) panelSinVision.hidden = !a11y.accesoSinVision;
 }
 
 function actualizarUIRolYPerfilesRapidos() {
@@ -391,6 +394,44 @@ function inicializarEventosGlobales() {
 
   document.getElementById('btn-inicio-escuchar')?.addEventListener('click', () => {
     hablarTexto('RutaLibre. La ciudad, para todas las personas. Consulta barreras urbanas, lugares con accesibilidad reportada, planea rutas adaptadas y reporta problemas de tu calle.');
+  });
+
+  // Comandos de voz globales para Acceso sin visión
+  const ejecutarComandoVoz = () => {
+    const estadoEl = document.getElementById('comando-voz-estado');
+    if (!soportaReconocimientoVoz()) {
+      const msg = 'Tu navegador no admite comandos de voz. Usa las teclas Tab y Enter o Alt+V.';
+      if (estadoEl) estadoEl.textContent = msg;
+      hablarTexto(msg);
+      return;
+    }
+    if (estadoEl) estadoEl.textContent = 'Escuchando comando...';
+    iniciarDictado({
+      onResultado: (txt) => {
+        const cmd = txt.toLowerCase().trim();
+        if (estadoEl) estadoEl.textContent = `Comando escuchado: "${txt}"`;
+        if (/inicio/.test(cmd)) navegarA('inicio', true);
+        else if (/mapa|ruta/.test(cmd)) navegarA('mapa', true);
+        else if (/mis reportes|seguimiento/.test(cmd)) navegarA('mis-reportes', true);
+        else if (/reportar|barrera/.test(cmd)) navegarA('reportar', true);
+        else if (/aviso/.test(cmd)) navegarA('avisos', true);
+        else if (/ayuda/.test(cmd)) navegarA('ayuda', true);
+        else if (/perfil/.test(cmd)) navegarA('perfil', true);
+        else if (/parar|detener|silencio/.test(cmd)) detenerLectura();
+        else if (/leer/.test(cmd)) document.getElementById('btn-leer-seccion-actual')?.click();
+        else hablarTexto(`No reconocí el comando ${txt}. Di ir a mapa, ir a reportar, leer o parar.`);
+      },
+      onError: (msg) => {
+        if (estadoEl) estadoEl.textContent = msg;
+      }
+    });
+  };
+
+  document.getElementById('btn-comando-voz-global')?.addEventListener('click', ejecutarComandoVoz);
+  document.getElementById('btn-leer-seccion-actual')?.addEventListener('click', () => {
+    const secVisible = Array.from(document.querySelectorAll('.page-section')).find((s) => !s.hidden);
+    const texto = secVisible ? secVisible.innerText.slice(0, 700) : 'RutaLibre.';
+    hablarTexto(texto);
   });
 
   // Formulario Perfil de accesibilidad

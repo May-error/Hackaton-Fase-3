@@ -1129,10 +1129,41 @@ html.a11y-high-contrast .btn-secondary,
 html.a11y-high-contrast .btn-coral,
 html.a11y-high-contrast .btn-danger,
 html.a11y-high-contrast .nav-link.is-active,
-html.a11y-high-contrast .btn-quick-profile[aria-pressed="true"] {
-  color: #000000;
-  background: var(--amarillo);
+html.a11y-high-contrast .btn-quick-profile[aria-pressed="true"],
+html.a11y-high-contrast .btn-a11y[aria-pressed="true"],
+html.a11y-high-contrast .badge-demo,
+html.a11y-high-contrast .badge-yellow,
+html.a11y-high-contrast .skip-link {
+  color: #000000 !important;
+  background: var(--amarillo) !important;
+  border-color: #FFFFFF !important;
+}
+
+html.a11y-high-contrast .btn-outline,
+html.a11y-high-contrast .btn-map-ctrl,
+html.a11y-high-contrast .pill,
+html.a11y-high-contrast .role-select,
+html.a11y-high-contrast .field-group input,
+html.a11y-high-contrast .field-group select,
+html.a11y-high-contrast .field-group textarea,
+html.a11y-high-contrast .workplan-table input,
+html.a11y-high-contrast .workplan-table select {
+  background: #000000;
+  color: #FFFFFF;
   border-color: #FFFFFF;
+}
+
+html.a11y-high-contrast .btn-outline:hover,
+html.a11y-high-contrast .nav-link:hover,
+html.a11y-high-contrast .pill.is-active {
+  background: #FFFFFF;
+  color: #000000;
+}
+
+html.a11y-high-contrast .toast {
+  background: #000000;
+  color: #FFFFFF;
+  border: 2px solid var(--amarillo);
 }
 
 html.a11y-high-contrast .badge-info,
